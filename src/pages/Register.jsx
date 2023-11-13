@@ -1,10 +1,29 @@
 import { useContext } from "react";
 import { BsGithub, BsGoogle } from "react-icons/bs";
 import { AuthContext } from "../providers/AuthProvider";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 const Register = () => {
-  const { googleSignIn, githubSignIn, updateUserProfile } =
+  const { signUp, googleSignIn, githubSignIn, updateUserProfile } =
     useContext(AuthContext);
-  const handleSignUp = () => {};
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+  const onSubmit = (data) => {
+    signUp(data.email, data.password)
+      .then(() => {
+        updateUserProfile(data.name, data.photo).then(() => {
+          reset();
+          navigate("/");
+        });
+      })
+      .catch((error) => console.log(error));
+  };
+
   const handleGoogleSignIn = () => {
     googleSignIn()
       .then((result) => console.log(result.user))
@@ -37,7 +56,7 @@ const Register = () => {
             Continue with Github
           </button>
         </div>
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <label className="block">
             <span className="block mb-1 text-sm font-medium text-gray-700">
               Name
@@ -46,9 +65,14 @@ const Register = () => {
               className="w-full p-2 border rounded-lg outline-purple-600"
               type="text"
               placeholder="Your full name"
-              required
+              name="name"
+              {...register("name", { required: true })}
             />
+            {errors.name && (
+              <span className="text-red-600">Name is required</span>
+            )}
           </label>
+
           <label className="block">
             <span className="block mb-1 text-sm font-medium text-gray-700">
               Your Email
@@ -58,9 +82,29 @@ const Register = () => {
               type="email"
               name="email"
               placeholder="email"
-              required
+              {...register("email", { required: true })}
             />
+            {errors.email && (
+              <span className="text-red-600">Email is required</span>
+            )}
           </label>
+
+          <label className="block">
+            <span className="block mb-1 text-sm font-medium text-gray-700">
+              Photo
+            </span>
+            <input
+              className="w-full p-2 border rounded-lg outline-purple-600"
+              type="text"
+              placeholder="Your profile photo url"
+              name="photo"
+              {...register("photo", { required: true })}
+            />
+            {errors.photo && (
+              <span className="text-red-600">Photo url is required</span>
+            )}
+          </label>
+
           <label className="block">
             <span className="block mb-1 text-sm font-medium text-gray-700">
               Create a password
@@ -70,8 +114,25 @@ const Register = () => {
               type="password"
               name="password"
               placeholder="••••••••"
-              required
+              {...register("password", { required: true })}
             />
+            {errors.password?.type === "required" && (
+              <p className="text-red-600">Password is required</p>
+            )}
+            {errors.password?.type === "minLength" && (
+              <p className="text-red-600">Password must be 6 characters</p>
+            )}
+            {errors.password?.type === "maxLength" && (
+              <p className="text-red-600">
+                Password must be less than 20 characters
+              </p>
+            )}
+            {errors.password?.type === "pattern" && (
+              <p className="text-red-600">
+                Password must have one Uppercase one lower case, one number and
+                one special character.
+              </p>
+            )}
           </label>
           <input
             type="submit"

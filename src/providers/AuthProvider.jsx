@@ -33,7 +33,7 @@ const AuthProvider = ({ children }) => {
     return signInWithPopup(auth, githubProvider);
   };
   const logOut = () => {
-    setLoading(true)
+    setLoading(true);
     return signOut(auth);
   };
   const updateUserProfile = (name, photo) => {
@@ -53,6 +53,7 @@ const AuthProvider = ({ children }) => {
       return unSubscribe();
     };
   }, []);
+
   const authInfo = {
     user,
     signUp,
